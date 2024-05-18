@@ -12,7 +12,7 @@ using ExamManagement.Models.Errors;
 namespace ExamManagement.Controllers
 {
 
-    //[Authorize(Roles = "Admin")] // turn this on to test authorization
+    [Authorize(Roles = "Admin")] // turn this on to test authorization
     [Route("api/[controller]")]
     [ApiController]
     public class TeacherQuestionController : ControllerBase

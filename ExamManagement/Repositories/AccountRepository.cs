@@ -28,7 +28,7 @@ namespace ExamManagement.Repositories
             var createUser = await userManager.CreateAsync(newUser!, userDTO.Password);
             if (!createUser.Succeeded) return new GeneralResponse(false, "Error occured.. please try again");
 
-            //Assign Default Role : Admin to first registrar; rest is user
+            //Assign Default Role : Admin to first registrater; rest is user
             var checkAdmin = await roleManager.FindByNameAsync("Admin");
             if (checkAdmin is null)
             {
@@ -45,6 +45,39 @@ namespace ExamManagement.Repositories
                 await userManager.AddToRoleAsync(newUser, "User");
                 return new GeneralResponse(true, "Account Created");
             }
+        }
+
+        public async Task<GeneralResponse> CreateAdminAccount(UserDTO adminDTO)
+        {
+            if (adminDTO is null) return new GeneralResponse(false, "Model is empty");
+
+            var newAdmin = new ApplicationUser()
+            {
+                Name = adminDTO.Name,
+                Email = adminDTO.Email,
+                PasswordHash = adminDTO.Password,
+                UserName = adminDTO.Email
+            };
+
+            var existingUser = await userManager.FindByEmailAsync(newAdmin.Email);
+            if (existingUser is not null)
+                return new GeneralResponse(false, "User already registered");
+
+            var result = await userManager.CreateAsync(newAdmin, adminDTO.Password);
+            if (!result.Succeeded)
+                return new GeneralResponse(false, "Error occurred while creating the account.");
+
+            // Ensure the Admin role exists
+            var adminRole = await roleManager.FindByNameAsync("Admin");
+            if (adminRole == null)
+            {
+                adminRole = new IdentityRole("Admin");
+                await roleManager.CreateAsync(adminRole);
+            }
+
+            // Add the user to the Admin role
+            await userManager.AddToRoleAsync(newAdmin, "Admin");
+            return new GeneralResponse(true, "Admin account created");
         }
 
         public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)
