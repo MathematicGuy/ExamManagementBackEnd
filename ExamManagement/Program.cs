@@ -63,6 +63,16 @@ builder.Services.AddAuthentication(options =>
 });
 
 //Add authentication to Swagger UI
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
@@ -76,6 +86,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
 builder.Services.AddApplicationInsightsTelemetry();
+
 //Ending...
 var app = builder.Build();
 
@@ -86,7 +97,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors(policy =>
     {
-        policy.WithOrigins("http://localhost:7254", "https://localhost:7254")
+        policy.WithOrigins("http://localhost:7254", "https://localhost:7254", "https://yunom2834-001-site1.gtempurl.com", "http://yunom2834-001-site1.gtempurl.com")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .WithHeaders(HeaderNames.ContentType);
@@ -94,10 +105,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

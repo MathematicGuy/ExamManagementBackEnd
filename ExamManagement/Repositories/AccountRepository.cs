@@ -1,12 +1,12 @@
 ﻿using ExamManagement.Contracts;
 using ExamManagement.Data;
-using ExamManagement.DTOs;
+using ExamManagement.DTOs.AuthenticationDTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using static ExamManagement.DTOs.ServiceResponses;
+using static ExamManagement.DTOs.AuthenticationDTOs.ServiceResponses;
 namespace ExamManagement.Repositories
 {
     public class AccountRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config) : IUserAccount

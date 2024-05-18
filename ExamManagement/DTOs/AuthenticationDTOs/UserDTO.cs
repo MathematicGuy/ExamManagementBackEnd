@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace ExamManagement.DTOs
+namespace ExamManagement.DTOs.AuthenticationDTOs
 {
     public class UserDTO
     {

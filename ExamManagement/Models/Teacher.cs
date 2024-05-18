@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace ExamManagement.Models.Domains
+namespace ExamManagement.Models
 {
     public class Teacher
     {

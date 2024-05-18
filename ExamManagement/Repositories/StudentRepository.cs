@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ExamManagement.Models.Domains;
 using ExamManagement.Data;
+using ExamManagement.Models;
 
 namespace ExamManagement.Repositories
 {

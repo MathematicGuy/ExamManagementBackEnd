@@ -1,12 +1,12 @@
 ﻿using ExamManagement.Data;
-using ExamManagement.Models.Domains;
-using ExamManagement.Models.ViewModels;
 using ExamManagement.Repositories;
 using ExamManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using ExamManagement.Services;
+using ExamManagement.DTOs.StudentDTOs;
+using ExamManagement.Models.Errors;
 
 namespace ExamManagement.Controllers
 {

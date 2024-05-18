@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ExamManagement.Data;
 
-namespace ExamManagement.Models.Domains
+namespace ExamManagement.Models
 {
     public class TeacherAssignment
     {

@@ -1,4 +1,4 @@
-﻿using ExamManagement.Models.Domains;
+﻿using ExamManagement.Models;
 
 namespace ExamManagement.Repositories
 {

@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ExamManagement.Models.Domains;
+using ExamManagement.DTOs.QuestionDTOs;
+using ExamManagement.Models;
 
-namespace ExamManagement.Models.ViewModels
+namespace ExamManagement.DTOs.AssignmentDTOs
 {
 
     public class CreateAssignment
@@ -17,7 +18,6 @@ namespace ExamManagement.Models.ViewModels
         public DateTime PublishTime { get; set; }
 
         public DateTime? CloseTime { get; set; }
-
 
         public List<CreateQuestion> Questions { get; set; } = new();
 

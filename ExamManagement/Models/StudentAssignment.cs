@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 
-namespace ExamManagement.Models.Domains
+namespace ExamManagement.Models
 {
     public class StudentAssignment
     {

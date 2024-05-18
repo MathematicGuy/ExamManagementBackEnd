@@ -1,4 +1,4 @@
-﻿namespace ExamManagement.Models
+﻿namespace ExamManagement.Models.Errors
 {
     public class ErrorResponse
     {

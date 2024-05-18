@@ -1,7 +1,7 @@
 ﻿using ExamManagement.Data;
 using System.ComponentModel.DataAnnotations;
 
-namespace ExamManagement.Models.Domains
+namespace ExamManagement.Models
 {
     public class Assignment
     {

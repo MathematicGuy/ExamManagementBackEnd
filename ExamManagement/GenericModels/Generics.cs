@@ -1,4 +1,4 @@
-﻿using ExamManagement.DTOs;
+﻿using ExamManagement.DTOs.AuthenticationDTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;

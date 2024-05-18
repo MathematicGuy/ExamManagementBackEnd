@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ExamManagement.Models.ViewModels
+namespace ExamManagement.DTOs.StudentDTOs
 {
-    public class CreateStudent
+    public class UpdateStudent
     {
-        public int StudentId { get; set; }
+        //[Required]
+        //public int StudentId { get; set; }
 
         [Required(ErrorMessage = "Name is required.")]
         public string? Name { get; set; }
@@ -12,5 +13,5 @@ namespace ExamManagement.Models.ViewModels
         public string? Status { get; set; }
 
     }
-
 }
+

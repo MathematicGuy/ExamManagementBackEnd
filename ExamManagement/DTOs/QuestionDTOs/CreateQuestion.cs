@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ExamManagement.Models.ViewModels
+namespace ExamManagement.DTOs.QuestionDTOs
 {
-    // Saving Edit Model data then transfer it to List Model
-    public class UpdateQuestion
+    public class CreateQuestion
     {
+        //public int Id { get; set; }
 
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         public string? Description { get; set; }
 
@@ -18,4 +18,5 @@ namespace ExamManagement.Models.ViewModels
         public string? Status { get; set; }
 
     }
+
 }

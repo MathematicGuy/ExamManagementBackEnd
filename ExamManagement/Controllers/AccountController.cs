@@ -1,5 +1,5 @@
 ﻿using ExamManagement.Contracts;
-using ExamManagement.DTOs;
+using ExamManagement.DTOs.AuthenticationDTOs;
 using Microsoft.AspNetCore.Mvc;
 namespace ExamManagement.Controllers
 {

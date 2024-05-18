@@ -1,6 +1,5 @@
 ﻿using ExamManagement.Data;
-using ExamManagement.Models;
-using ExamManagement.Models.Domains;
+using ExamManagement.Models.Errors;
 using ExamManagement.Repositories;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
