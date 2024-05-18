@@ -6,8 +6,8 @@ namespace ExamManagement.Data
     {
         //"id": "2",
         //"name": "Admin",
-        //"email": "admin2@example.com",
-        //"password": "Admin2@123",
+        //"email": "admin@example.com",
+        //"password": "Admin@123",
 
         public string? Name { get; set; }
     }

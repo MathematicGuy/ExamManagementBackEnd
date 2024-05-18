@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Web.Mvc;
 using static ExamManagement.DTOs.AuthenticationDTOs.ServiceResponses;
 namespace ExamManagement.Repositories
 {
@@ -80,44 +81,92 @@ namespace ExamManagement.Repositories
             return new GeneralResponse(true, "Admin account created");
         }
 
+        public async Task<GeneralResponse> CreateSuperAdmin(UserDTO superAdminDTO)
+        {
+            if (superAdminDTO is null) return new GeneralResponse(false, "Model is empty");
+
+            var newSuperAdmin = new ApplicationUser()
+            {
+                Name = superAdminDTO.Name,
+                Email = superAdminDTO.Email,
+                PasswordHash = superAdminDTO.Password,
+                UserName = superAdminDTO.Email
+            };
+
+            var existingUser = await userManager.FindByEmailAsync(newSuperAdmin.Email);
+            if (existingUser is not null)
+                return new GeneralResponse(false, "User already registered");
+
+            var result = await userManager.CreateAsync(newSuperAdmin, superAdminDTO.Password);
+            if (!result.Succeeded)
+                return new GeneralResponse(false, "Error occurred while creating the account.");
+
+            // Ensure the Admin role exists if not create and assign to the user
+            var superAdminRole = await roleManager.FindByNameAsync("SuperAdmin");
+            if (superAdminRole == null)
+            {
+                superAdminRole = new IdentityRole("SuperAdmin");
+                await roleManager.CreateAsync(superAdminRole);
+            }
+
+            // Assign "User" and "Admin" roles to the SuperAdmin
+            await userManager.AddToRoleAsync(newSuperAdmin, "User");
+            await userManager.AddToRoleAsync(newSuperAdmin, "Admin");
+
+            return new GeneralResponse(true, "Admin account created");
+        }
+
+
         public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)
         {
             if (loginDTO == null)
-                return new LoginResponse(false, null!, "Login container is empty");
+                return new LoginResponse(false, null!, "Login container is empty", null!);
 
-            var getUser = await userManager.FindByEmailAsync(loginDTO.Email);
-            if (getUser is null)
-                return new LoginResponse(false, null!, "User not found");
+            var user = await userManager.FindByEmailAsync(loginDTO.Email);
+            if (user == null)
+                return new LoginResponse(false, null!, "User not found", null!);
 
-            bool checkUserPasswords = await userManager.CheckPasswordAsync(getUser, loginDTO.Password);
+            bool checkUserPasswords = await userManager.CheckPasswordAsync(user, loginDTO.Password);
             if (!checkUserPasswords)
-                return new LoginResponse(false, null!, "Invalid email/password");
+                return new LoginResponse(false, null!, "Invalid email/password", null!);
 
-            var getUserRole = await userManager.GetRolesAsync(getUser);
-            var userSession = new UserSession(getUser.Id, getUser.Name, getUser.Email, getUserRole.First());
+            // Get the user's roles
+            var userRoles = await userManager.GetRolesAsync(user);
+
+            // Create UserSession with the roles
+            var userSession = new UserSession(user.Id, user.Name, user.Email, userRoles);
             string token = GenerateToken(userSession);
-            return new LoginResponse(true, token!, "Login completed");
+
+            // Return the response including the roles
+            return new LoginResponse(true, token, "Login completed", userRoles);
         }
+
 
         private string GenerateToken(UserSession user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var userClaims = new[]
+
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId),
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Email, user.Email)
             };
+
+            // Add roles to the claims
+            claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
             var token = new JwtSecurityToken(
                 issuer: config["Jwt:Issuer"],
                 audience: config["Jwt:Audience"],
-                claims: userClaims,
+                claims: claims,
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: credentials
-                );
+            );
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }

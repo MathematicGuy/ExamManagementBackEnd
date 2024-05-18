@@ -22,22 +22,7 @@ namespace ExamManagement.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ExamManagement.Models.AssignmentQuestion", b =>
-                {
-                    b.Property<int>("AssignmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AssignmentId", "QuestionId");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("AssignmentQuestions");
-                });
-
-            modelBuilder.Entity("ExamManagement.Models.Domains.Assignment", b =>
+            modelBuilder.Entity("ExamManagement.Models.Assignment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,11 +56,8 @@ namespace ExamManagement.Migrations
                     b.ToTable("Assignments");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.AssignmentQuestion", b =>
+            modelBuilder.Entity("ExamManagement.Models.AssignmentQuestion", b =>
                 {
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int");
 
@@ -89,7 +71,7 @@ namespace ExamManagement.Migrations
                     b.ToTable("AssignmentQuestions");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.FeedBack", b =>
+            modelBuilder.Entity("ExamManagement.Models.FeedBack", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -125,7 +107,7 @@ namespace ExamManagement.Migrations
                     b.ToTable("FeedBacks");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.Question", b =>
+            modelBuilder.Entity("ExamManagement.Models.Question", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -154,7 +136,7 @@ namespace ExamManagement.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.Student", b =>
+            modelBuilder.Entity("ExamManagement.Models.Student", b =>
                 {
                     b.Property<int>("StudentId")
                         .ValueGeneratedOnAdd()
@@ -177,7 +159,7 @@ namespace ExamManagement.Migrations
                     b.ToTable("Student");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.StudentAssignment", b =>
+            modelBuilder.Entity("ExamManagement.Models.StudentAssignment", b =>
                 {
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
@@ -192,7 +174,7 @@ namespace ExamManagement.Migrations
                     b.ToTable("StudentAssignments");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.Teacher", b =>
+            modelBuilder.Entity("ExamManagement.Models.Teacher", b =>
                 {
                     b.Property<int>("TeacherId")
                         .ValueGeneratedOnAdd()
@@ -205,7 +187,6 @@ namespace ExamManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("status")
@@ -216,7 +197,7 @@ namespace ExamManagement.Migrations
                     b.ToTable("Teacher");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.TeacherAssignment", b =>
+            modelBuilder.Entity("ExamManagement.Models.TeacherAssignment", b =>
                 {
                     b.Property<int>("TeacherId")
                         .HasColumnType("int");
@@ -231,15 +212,15 @@ namespace ExamManagement.Migrations
                     b.ToTable("TeacherAssignments");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.AssignmentQuestion", b =>
+            modelBuilder.Entity("ExamManagement.Models.AssignmentQuestion", b =>
                 {
-                    b.HasOne("ExamManagement.Models.Domains.Assignment", "Assignment")
+                    b.HasOne("ExamManagement.Models.Assignment", "Assignment")
                         .WithMany("AssignmentQuestions")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExamManagement.Models.Domains.Question", "Question")
+                    b.HasOne("ExamManagement.Models.Question", "Question")
                         .WithMany("AssignmentQuestion")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -250,24 +231,24 @@ namespace ExamManagement.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.FeedBack", b =>
+            modelBuilder.Entity("ExamManagement.Models.FeedBack", b =>
                 {
-                    b.HasOne("ExamManagement.Models.Domains.Question", "QuestionResponse")
+                    b.HasOne("ExamManagement.Models.Question", "QuestionResponse")
                         .WithMany("QuestionFeedback")
                         .HasForeignKey("QuestionResponseId");
 
                     b.Navigation("QuestionResponse");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.StudentAssignment", b =>
+            modelBuilder.Entity("ExamManagement.Models.StudentAssignment", b =>
                 {
-                    b.HasOne("ExamManagement.Models.Domains.Assignment", "Assignments")
+                    b.HasOne("ExamManagement.Models.Assignment", "Assignments")
                         .WithMany("StudentAssignments")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExamManagement.Models.Domains.Student", "Student")
+                    b.HasOne("ExamManagement.Models.Student", "Student")
                         .WithMany("StudentAssignments")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -278,15 +259,15 @@ namespace ExamManagement.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.TeacherAssignment", b =>
+            modelBuilder.Entity("ExamManagement.Models.TeacherAssignment", b =>
                 {
-                    b.HasOne("ExamManagement.Models.Domains.Assignment", "Assignment")
+                    b.HasOne("ExamManagement.Models.Assignment", "Assignment")
                         .WithMany("TeacherAssignments")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExamManagement.Models.Domains.Teacher", "Teacher")
+                    b.HasOne("ExamManagement.Models.Teacher", "Teacher")
                         .WithMany("TeacherAssignments")
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -297,7 +278,7 @@ namespace ExamManagement.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.Assignment", b =>
+            modelBuilder.Entity("ExamManagement.Models.Assignment", b =>
                 {
                     b.Navigation("AssignmentQuestions");
 
@@ -306,19 +287,19 @@ namespace ExamManagement.Migrations
                     b.Navigation("TeacherAssignments");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.Question", b =>
+            modelBuilder.Entity("ExamManagement.Models.Question", b =>
                 {
                     b.Navigation("AssignmentQuestion");
 
                     b.Navigation("QuestionFeedback");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.Student", b =>
+            modelBuilder.Entity("ExamManagement.Models.Student", b =>
                 {
                     b.Navigation("StudentAssignments");
                 });
 
-            modelBuilder.Entity("ExamManagement.Models.Domains.Teacher", b =>
+            modelBuilder.Entity("ExamManagement.Models.Teacher", b =>
                 {
                     b.Navigation("TeacherAssignments");
                 });

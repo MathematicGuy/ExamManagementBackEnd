@@ -7,9 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using ExamManagement.Services;
 using ExamManagement.DTOs.StudentDTOs;
 using ExamManagement.Models.Errors;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ExamManagement.Controllers
 {
+    [Authorize(Roles = "Admin")] 
     [Route("api/[controller]")]
     [ApiController]
 

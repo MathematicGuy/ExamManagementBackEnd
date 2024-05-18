@@ -6,7 +6,7 @@ namespace ExamManagement.Contracts
     {
         Task<GeneralResponse> CreateAccount(UserDTO userDTO);
         Task<GeneralResponse> CreateAdminAccount(UserDTO userDTO);
-
+        Task<GeneralResponse> CreateSuperAdmin(UserDTO userDTO);
         Task<LoginResponse> LoginAccount(LoginDTO loginDTO);
     }
 }

@@ -11,7 +11,7 @@ namespace ExamManagement.Repositories
         public TeacherQuestionRepository(SgsDbContext context)
         {
             _context = context;
-        }
+        }   
 
         public async Task<Question> CreateQuestionAsync(Question question)
         {
