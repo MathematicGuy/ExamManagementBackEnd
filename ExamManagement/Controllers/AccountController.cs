@@ -120,7 +120,7 @@ namespace ExamManagement.Controllers
 
 
         [HttpGet("GetUserByRole{roleName}")] // Example: api/userByRole/Student
-        //[Authorize(Roles = "Admin, SuperAdmin")] // Restrict access to authorized roles
+        //[Authorize(Roles = "Admin, SuperAdmi  n")] // Restrict access to authorized roles
         public async Task<IActionResult> GetUsersByRole(string roleName)
         {
             var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
@@ -134,7 +134,6 @@ namespace ExamManagement.Controllers
             {
                 Name = user.Name,
                 Email = user.Email
-                // ... include other relevant properties you want to expose 
             });
 
             return Ok(userDTOs);
