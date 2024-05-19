@@ -5,6 +5,8 @@ using ExamManagement.Models.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 
 namespace ExamManagement.Controllers
@@ -42,6 +44,15 @@ namespace ExamManagement.Controllers
             }
         }
 
+        [HttpPost("CreateAdmin")]
+        [Authorize(Roles = "Admin")] // Restrict to existing SuperAdmin only
+        //[Authorize(Policy = "SuperAdminOnly")] // Apply to specific action
+        public async Task<IActionResult> CreateAdmin(UserDTO adminDTO)
+        {
+            var response = await userAccount.CreateAdminAccount(adminDTO);
+            return Ok(response);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserDTO userDTO)
         {
@@ -58,13 +69,52 @@ namespace ExamManagement.Controllers
             return Ok(response);
         }
 
-        [HttpPost("CreateAdmin")]
-        [Authorize(Roles = "Admin")] // Restrict to existing SuperAdmin only
-        //[Authorize(Policy = "SuperAdminOnly")] // Apply to specific action
-        public async Task<IActionResult> CreateAdmin(UserDTO adminDTO)
+
+        [HttpGet("Account")]
+        [Authorize] // Requires user to be logged in. reutrn 401 if not logged in
+        public async Task<IActionResult> GetCurrentUserInfo()
         {
-            var response = await userAccount.CreateAdminAccount(adminDTO);
-            return Ok(response);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get User ID
+
+            //if (string.IsNullOrEmpty(userId))
+            //{
+            //    return Unauthorized(new { message = "User must Logged in to see your personal information" });
+            //}
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            // Get token expiration time
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", ""));
+            var tokenExpiry = token.ValidTo;
+
+            var userInfo = new
+            {
+                user.Id,
+                user.Name,
+                user.UserName,
+                user.Email,
+                user.PhoneNumber,
+                user.EmailConfirmed,
+                user.PasswordHash,
+                user.SecurityStamp,
+                user.NormalizedEmail,
+                user.NormalizedUserName,
+                user.ConcurrencyStamp,
+                user.LockoutEnd,
+                user.TwoFactorEnabled,
+                user.LockoutEnabled,
+                user.AccessFailedCount,
+                Token = token.RawData,
+                TokenExpiration = tokenExpiry  // Include token expiration time
+            };
+
+            return Ok(userInfo);
         }
     }
 }

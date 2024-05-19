@@ -3,7 +3,7 @@ namespace ExamManagement.DTOs.AuthenticationDTOs
 {
     public class UserDTO
     {
-        public string? Id { get; set; } = string.Empty;
+        //public string? Id { get; set; } = string.Empty;
         [Required]
         public string Name { get; set; } = string.Empty;
 
