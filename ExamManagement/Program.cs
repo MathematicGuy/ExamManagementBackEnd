@@ -37,6 +37,10 @@ builder.Services.AddScoped<ITeacherQuestionRepository, TeacherQuestionRepository
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
 
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
+
+
 // Add Identity & JWT authentication
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -92,9 +96,18 @@ builder.Services.AddSwaggerGen(options =>
 
 // Add telemetry
 builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
-
+app.UseCors();
 
 // Seed roles and super admin
 //using (var scope = app.Services.CreateScope())
@@ -117,14 +130,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    app.UseCors(policy =>
-    {
-        policy.WithOrigins("http://localhost:7254", "https://localhost:7254", "https://yunom2834-001-site1.gtempurl.com")
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .WithHeaders(HeaderNames.ContentType);
-    });
+    //app.UseCors(policy =>
+    //{
+    //    policy.WithOrigins("http://localhost:7254", "https://localhost:7254", "https://yunom2834-001-site1.gtempurl.com")
+    //    .AllowAnyMethod()
+    //    .AllowAnyHeader()
+    //    .WithHeaders(HeaderNames.ContentType);
+    //});
 }
+
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

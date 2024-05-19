@@ -56,39 +56,57 @@ namespace ExamManagement.Repositories
             }
         }
 
-        public async Task<GeneralResponse> CreateAdminAccount(UserDTO adminDTO)
+        public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)
         {
-            if (adminDTO is null) return new GeneralResponse(false, "Model is empty");
+            if (loginDTO == null)
+                return new LoginResponse(false, null!, "Login container is empty", null!);
 
-            var newAdmin = new ApplicationUser()
-            {
-                Name = adminDTO.Name,
-                Email = adminDTO.Email,
-                PasswordHash = adminDTO.Password,
-                UserName = adminDTO.Email
-            };
+            var user = await userManager.FindByEmailAsync(loginDTO.Email);
+            if (user == null)
+                return new LoginResponse(false, null!, "User not found", null!);
 
-            var existingUser = await userManager.FindByEmailAsync(newAdmin.Email);
-            if (existingUser is not null)
-                return new GeneralResponse(false, "User already registered");
+            bool checkUserPasswords = await userManager.CheckPasswordAsync(user, loginDTO.Password);
+            if (!checkUserPasswords)
+                return new LoginResponse(false, null!, "Invalid email/password", null!);
 
-            var result = await userManager.CreateAsync(newAdmin, adminDTO.Password);
-            if (!result.Succeeded)
-                return new GeneralResponse(false, "Error occurred while creating the account.");
+            // Get the user's roles
+            var userRoles = await userManager.GetRolesAsync(user);
 
-            // Ensure the Admin role exists
-            var adminRole = await roleManager.FindByNameAsync("Admin");
-            if (adminRole == null)
-            {
-                adminRole = new IdentityRole("Admin");
-                await roleManager.CreateAsync(adminRole);
-            }
+            // Create UserSession with the roles
+            var userSession = new UserSession(user.Id, user.Name, user.Email, userRoles);
+            string token = GenerateToken(userSession);
 
-            // Add the user to the Admin role
-            await userManager.AddToRoleAsync(newAdmin, "Admin");
-            return new GeneralResponse(true, "Admin account created");
+            // Return the response including the roles
+            return new LoginResponse(true, token, "Login completed", userRoles);
         }
 
+        private string GenerateToken(UserSession user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            // Add roles to the claims
+            claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+            var token = new JwtSecurityToken(
+                issuer: config["Jwt:Issuer"],
+                audience: config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        // Create User, Student, Teacher, Admin, SuperAdmin
         public async Task<GeneralResponse> CreateSuperAdmin(UserDTO superAdminDTO)
         {
             if (superAdminDTO is null) return new GeneralResponse(false, "Model is empty");
@@ -124,80 +142,116 @@ namespace ExamManagement.Repositories
             return new GeneralResponse(true, "Admin account created");
         }
 
-
-        public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)
+        public async Task<GeneralResponse> CreateAdminAccount(UserDTO adminDTO)
         {
-            if (loginDTO == null)
-                return new LoginResponse(false, null!, "Login container is empty", null!);
+            if (adminDTO is null) return new GeneralResponse(false, "Model is empty");
 
-            var user = await userManager.FindByEmailAsync(loginDTO.Email);
-            if (user == null)
-                return new LoginResponse(false, null!, "User not found", null!);
-
-            bool checkUserPasswords = await userManager.CheckPasswordAsync(user, loginDTO.Password);
-            if (!checkUserPasswords)
-                return new LoginResponse(false, null!, "Invalid email/password", null!);
-
-            // Get the user's roles
-            var userRoles = await userManager.GetRolesAsync(user);
-
-            // Create UserSession with the roles
-            var userSession = new UserSession(user.Id, user.Name, user.Email, userRoles);
-            string token = GenerateToken(userSession);
-
-            // Return the response including the roles
-            return new LoginResponse(true, token, "Login completed", userRoles);
-        }
-
-
-        // In your AccountRepository class (or wherever you implement IUserAccount)
-        //public async Task<UserListResponse> GetUsersByRoleAsync(string roleName)
-        //{
-        //    var users = await userManager.GetUsersInRoleAsync(roleName);
-
-        //    if (users == null)
-        //    {
-        //        return new UserListResponse(false, "No user found", null);
-        //    }
-
-        //    var viewUserDTOs = users.Select(user => new ViewUserDTO
-        //    {
-        //        Id = user.Id,
-        //        Name = user.Name,   
-        //        Email = user.Email,
-        //        PhoneNumber = user.PhoneNumber                
-        //    });
-
-        //    return new UserListResponse(true, "Users retrieved successfully.", viewUserDTOs);
-        //}
-
-
-
-        private string GenerateToken(UserSession user)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new List<Claim>
+            var newAdmin = new ApplicationUser()
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email)
+                Name = adminDTO.Name,
+                Email = adminDTO.Email,
+                PasswordHash = adminDTO.Password,
+                UserName = adminDTO.Email
             };
 
-            // Add roles to the claims
-            claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
+            var existingUser = await userManager.FindByEmailAsync(newAdmin.Email);
+            if (existingUser is not null)
+                return new GeneralResponse(false, "User already registered");
 
-            var token = new JwtSecurityToken(
-                issuer: config["Jwt:Issuer"],
-                audience: config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: credentials
-            );
+            var result = await userManager.CreateAsync(newAdmin, adminDTO.Password);
+            if (!result.Succeeded)
+                return new GeneralResponse(false, "Error occurred while creating the account.");
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            // Ensure the Admin role exists
+            var adminRole = await roleManager.FindByNameAsync("Admin");
+            if (adminRole == null)
+            {
+                adminRole = new IdentityRole("Admin");
+                await roleManager.CreateAsync(adminRole);
+            }
+
+            // Add the user to the Admin role
+            await userManager.AddToRoleAsync(newAdmin, "Admin");
+            return new GeneralResponse(true, "Admin account created");
         }
 
+        public async Task<GeneralResponse> CreateTeacherAccount(UserDTO teacherDTO)
+        {
+            if (teacherDTO is null)
+                return new GeneralResponse(false, "Model is empty");
+
+            var newTeacher = new ApplicationUser()
+            {
+                Name = teacherDTO.Name,
+                Email = teacherDTO.Email,
+                PasswordHash = teacherDTO.Password,
+                UserName = teacherDTO.Email
+            };
+
+            var existingUser = await userManager.FindByEmailAsync(newTeacher.Email);
+            if (existingUser is not null)
+                return new GeneralResponse(false, "User already registered");
+
+            var result = await userManager.CreateAsync(newTeacher, teacherDTO.Password);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description);
+                return new GeneralResponse(false, string.Join(", ", errors)); // Return error message with details
+            }
+
+            // Ensure the Teacher role exists
+            var teacherRole = await roleManager.FindByNameAsync("Teacher");
+            if (teacherRole == null)
+            {
+                teacherRole = new IdentityRole("Teacher");
+                await roleManager.CreateAsync(teacherRole);
+            }
+
+            // Add the user to the Teacher role
+            await userManager.AddToRoleAsync(newTeacher, "Teacher");
+            return new GeneralResponse(true, "Teacher account created");
+        }
+
+        public async Task<GeneralResponse> CreateStudentAccount(UserDTO studentDTO)
+        {
+            if (studentDTO is null)
+                return new GeneralResponse(false, "Model is empty");
+
+            var newStudent = new ApplicationUser()
+            {
+                Name = studentDTO.Name,
+                Email = studentDTO.Email,
+                PasswordHash = studentDTO.Password,
+                UserName = studentDTO.Email
+            };
+
+            var existingUser = await userManager.FindByEmailAsync(newStudent.Email);
+            if (existingUser is not null)
+                return new GeneralResponse(false, "User already registered");
+
+            var result = await userManager.CreateAsync(newStudent, studentDTO.Password);
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description);
+                return new GeneralResponse(false, string.Join(", ", errors));
+            }
+
+            // Ensure the Student role exists
+            var studentRole = await roleManager.FindByNameAsync("Student");
+            if (studentRole == null)
+            {
+                studentRole = new IdentityRole("Student");
+                await roleManager.CreateAsync(studentRole);
+            }
+
+            // Add the user to the Student role
+            await userManager.AddToRoleAsync(newStudent, "Student");
+            return new GeneralResponse(true, "Student account created");
+        }
+
+
+        // Update Profile Features
     }
+
 }

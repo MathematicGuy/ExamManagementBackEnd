@@ -14,14 +14,15 @@ public static class DataSeeder
         {
             await roleManager.CreateAsync(new IdentityRole("Teacher"));
         }
-        if (!await roleManager.RoleExistsAsync("SuperAdmin"))
-        {
-            await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
-        }
         if (!await roleManager.RoleExistsAsync("Admin"))
         {
             await roleManager.CreateAsync(new IdentityRole("Admin"));
         }
+        if (!await roleManager.RoleExistsAsync("SuperAdmin"))
+        {
+            await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+        }
+
     }
 
     public static async Task SeedSuperAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
@@ -29,12 +30,12 @@ public static class DataSeeder
         var superAdmin = new ApplicationUser
         {
             Name = "Super", // Custom property if you have added it
-            UserName = "superadmin@gmail.com",
-            NormalizedUserName = "SUPERADMIN@GMAIL.COM",
-            Email = "superadmin@gmail.com",
-            NormalizedEmail = "SUPERADMIN@GMAIL.COM",
+            UserName = "superadmin2@gmail.com",
+            NormalizedUserName = "SUPERADMIN2@GMAIL.COM",
+            Email = "superadmin2@gmail.com",
+            NormalizedEmail = "SUPERADMIN2@GMAIL.COM",
             EmailConfirmed = true,
-            PhoneNumber = "+1234567890",
+            PhoneNumber = "+0363965123",
             PhoneNumberConfirmed = true,
             SecurityStamp = Guid.NewGuid().ToString("D"),
             ConcurrencyStamp = Guid.NewGuid().ToString("D"),
@@ -50,7 +51,7 @@ public static class DataSeeder
             var result = await userManager.CreateAsync(superAdmin, "Super@123");
             if (result.Succeeded)
             {
-                await userManager.AddToRolesAsync(superAdmin, new[] { "Student", "Teacher", "SuperAdmin", "Admin" });
+                await userManager.AddToRolesAsync(superAdmin, new[] { "SuperAdmin", "Admin", "Student", "Teacher"});
             }
         }
     }

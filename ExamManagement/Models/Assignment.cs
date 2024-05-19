@@ -21,13 +21,13 @@ namespace ExamManagement.Models
         public int? AssignmentTotalPoints { get; set; }
 
         [Required]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         // Many to 1 Teacher & Student User
         public ICollection<TeacherAssignment>? TeacherAssignments { get; set; } // Change to
         public ICollection<StudentAssignment>? StudentAssignments { get; set; } // Change to ICollection
 
-        // 1 to many to QuestionResponse
+        // 1 to many to AssignmentQuestion
         public ICollection<AssignmentQuestion>? AssignmentQuestions { get; set; }
     }
 }

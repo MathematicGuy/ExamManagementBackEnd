@@ -45,13 +45,64 @@ namespace ExamManagement.Controllers
             }
         }
 
-        [HttpPost("CreateAdmin")]
         [Authorize(Roles = "Admin")] // Restrict to existing SuperAdmin only
+        [HttpPost("CreateAdmin")]
         //[Authorize(Policy = "SuperAdminOnly")] // Apply to specific action
         public async Task<IActionResult> CreateAdmin(UserDTO adminDTO)
         {
             var response = await userAccount.CreateAdminAccount(adminDTO);
             return Ok(response);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("CreateTeacher")]
+        public async Task<IActionResult> CreateTeacher(UserDTO teacherDTO)
+        {
+
+            var result = await userAccount.CreateTeacherAccount(teacherDTO);
+
+            if (result.Flag) // Check if the operation was successful
+            {
+                return Ok(result); // Return success response
+            }
+            else
+            {
+                // Create and return an ErrorResponse from the GeneralResponse
+                return BadRequest(new ErrorResponse
+                {
+                    Message = result.Message,
+                    Details = new[] { "Failed to create Teacher user." } // You can customize details here if needed
+                });
+            }
+        }
+
+
+        //{
+        //  "name": "Student",
+        //  "email": "student@gmail.com",
+        //  "password": "Std@123",
+        //  "confirmPassword": "Std@123"
+        //}
+        [Authorize(Roles = "Admin")]
+        [HttpPost("CreateStudent")]
+        public async Task<IActionResult> CreateStudent(UserDTO studentDTO)
+        {
+
+            var result = await userAccount.CreateStudentAccount(studentDTO);
+
+            if (result.Flag) // Check if the operation was successful
+            {
+                return Ok(result); // Return success response
+            }
+            else
+            {
+                // Create and return an ErrorResponse from the GeneralResponse
+                return BadRequest(new ErrorResponse
+                {
+                    Message = result.Message,
+                    Details = new[] { "Failed to create Student user." } // You can customize details here if needed
+                });
+            }
         }
 
         [HttpPost("register")]

@@ -19,7 +19,7 @@ namespace ExamManagement.DTOs.AssignmentDTOs
 
         public DateTime? CloseTime { get; set; }
 
-        public List<CreateQuestion> Questions { get; set; } = new();
+        public List<CreateQuestion>? Questions { get; set; } = new();
 
         // You can add a method to calculate total points based on QuestionViewModels
         public int? GetTotalPoints() => Questions.Sum(q => q.TotalPoints);
