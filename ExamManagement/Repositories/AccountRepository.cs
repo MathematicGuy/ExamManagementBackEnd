@@ -151,6 +151,29 @@ namespace ExamManagement.Repositories
         }
 
 
+        // In your AccountRepository class (or wherever you implement IUserAccount)
+        //public async Task<UserListResponse> GetUsersByRoleAsync(string roleName)
+        //{
+        //    var users = await userManager.GetUsersInRoleAsync(roleName);
+
+        //    if (users == null)
+        //    {
+        //        return new UserListResponse(false, "No user found", null);
+        //    }
+
+        //    var viewUserDTOs = users.Select(user => new ViewUserDTO
+        //    {
+        //        Id = user.Id,
+        //        Name = user.Name,   
+        //        Email = user.Email,
+        //        PhoneNumber = user.PhoneNumber                
+        //    });
+
+        //    return new UserListResponse(true, "Users retrieved successfully.", viewUserDTOs);
+        //}
+
+
+
         private string GenerateToken(UserSession user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));

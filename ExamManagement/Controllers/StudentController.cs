@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ExamManagement.Controllers
 {
-    [Authorize(Roles = "Admin")] 
+    //[Authorize(Roles = "User")] 
     [Route("api/[controller]")]
     [ApiController]
 

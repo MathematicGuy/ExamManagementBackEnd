@@ -8,5 +8,8 @@ namespace ExamManagement.Contracts
         Task<GeneralResponse> CreateAdminAccount(UserDTO userDTO);
         Task<GeneralResponse> CreateSuperAdmin(UserDTO userDTO);
         Task<LoginResponse> LoginAccount(LoginDTO loginDTO);
+
+        // New action to get users by role
+        //Task<UserListResponse> GetUsersByRoleAsync(string roleName);
     }
 }

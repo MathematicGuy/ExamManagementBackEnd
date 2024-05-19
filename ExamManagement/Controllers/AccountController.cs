@@ -2,6 +2,7 @@
 using ExamManagement.Data;
 using ExamManagement.DTOs.AuthenticationDTOs;
 using ExamManagement.Models.Errors;
+using ExamManagement.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -115,6 +116,28 @@ namespace ExamManagement.Controllers
             };
 
             return Ok(userInfo);
+        }
+
+
+        [HttpGet("GetUserByRole{roleName}")] // Example: api/userByRole/Student
+        //[Authorize(Roles = "Admin, SuperAdmin")] // Restrict access to authorized roles
+        public async Task<IActionResult> GetUsersByRole(string roleName)
+        {
+            var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+
+            if (usersInRole == null || !usersInRole.Any())
+            {
+                return NotFound(new { message = $"No users found with role '{roleName}'" });
+            }
+
+            var userDTOs = usersInRole.Select(user => new UserDTO
+            {
+                Name = user.Name,
+                Email = user.Email
+                // ... include other relevant properties you want to expose 
+            });
+
+            return Ok(userDTOs);
         }
     }
 }
