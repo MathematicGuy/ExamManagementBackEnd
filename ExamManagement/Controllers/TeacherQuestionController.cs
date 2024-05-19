@@ -13,7 +13,7 @@ using System.Security.Claims;
 namespace ExamManagement.Controllers
 {
 
-    [Authorize(Roles = "Teacher")] // turn this on to test authorization
+    [Authorize(Roles = "Admin")] // turn this on to test authorization
     [Route("api/[controller]")]
     [ApiController]
     public class TeacherQuestionController : ControllerBase
