@@ -119,7 +119,7 @@ if (app.Environment.IsDevelopment())
 
     app.UseCors(policy =>
     {
-        policy.WithOrigins("http://localhost:7254", "https://localhost:7254", "https://yunom2834-001-site1.gtempurl.com", "http://yunom2834-001-site1.gtempurl.com")
+        policy.WithOrigins("http://localhost:7254", "https://localhost:7254", "https://yunom2834-001-site1.gtempurl.com")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .WithHeaders(HeaderNames.ContentType);
