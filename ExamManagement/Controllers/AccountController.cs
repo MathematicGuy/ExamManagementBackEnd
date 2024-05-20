@@ -135,8 +135,24 @@ namespace ExamManagement.Controllers
             return Ok(response);
         }
 
+        [Authorize]
+        [HttpPut("UpdateAccount")]
+        public async Task<IActionResult> UpdateAccount(UserDTO updateUserDTO)
+        {
+            if (updateUserDTO == null)
+                return BadRequest(new ErrorResponse { Message = "Model is empty" });
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var response = await _userAccount.UpdateAccountAsync(userId, updateUserDTO);
+
+            if (!response.Flag)
+                return BadRequest(new ErrorResponse { Message = response.Message });
+
+            return Ok(response);
+        }
+
         //[HttpPost("logout")]
-        //[Authorize]   
+        //[Authorize]
         //public async Task<IActionResult> Logout()
         //{
         //    // Retrieve the token from the Authorization header
@@ -235,6 +251,8 @@ namespace ExamManagement.Controllers
 
             return Ok(userDTOs);
         }
+
+
     }
 }
 

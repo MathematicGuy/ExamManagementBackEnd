@@ -83,6 +83,35 @@ namespace ExamManagement.Repositories
             }
         }
 
+        public async Task<GeneralResponse> UpdateAccountAsync(string userId, UserDTO updateUserDTO)
+        {
+            if (updateUserDTO == null)
+                return new GeneralResponse(false, "Model is empty");
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return new GeneralResponse(false, "User not found");
+
+            user.Name = updateUserDTO.Name;
+            user.Email = updateUserDTO.Email;
+            user.UserName = updateUserDTO.Email;
+
+            var updateResult = await userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+                return new GeneralResponse(false, "Failed to update user details");
+
+            if (!string.IsNullOrWhiteSpace(updateUserDTO.Password) && updateUserDTO.Password == updateUserDTO.ConfirmPassword)
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await userManager.ResetPasswordAsync(user, token, updateUserDTO.Password);
+                if (!passwordResult.Succeeded)
+                    return new GeneralResponse(false, "Failed to update password");
+            }
+
+            return new GeneralResponse(true, "Account updated successfully");
+        }
+
+
         public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)
         {
             if (loginDTO == null)
@@ -290,6 +319,8 @@ namespace ExamManagement.Repositories
             await userManager.AddToRoleAsync(newStudent, "Student");
             return new GeneralResponse(true, "Student account created");
         }
+
+
 
 
         // Update Profile Features

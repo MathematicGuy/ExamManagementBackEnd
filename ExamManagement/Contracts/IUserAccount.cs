@@ -5,6 +5,7 @@ namespace ExamManagement.Contracts
     public interface IUserAccount
     {
         Task<GeneralResponse> CreateAccount(UserDTO userDTO);
+        Task<GeneralResponse> UpdateAccountAsync(string userId, UserDTO updateUserDTO);
         Task<GeneralResponse> CreateAdminAccount(UserDTO userDTO);
         Task<GeneralResponse> CreateSuperAdmin(UserDTO userDTO);
         Task<LoginResponse> LoginAccount(LoginDTO loginDTO);

@@ -13,7 +13,7 @@ using System.Security.Claims;
 namespace ExamManagement.Controllers
 {
 
-    [Authorize(Roles = "Admin")] // turn this on to test authorization
+    [Authorize(Roles = "Teacher")] // turn this on to test authorization
     [Route("api/[controller]")]
     [ApiController]
     public class TeacherQuestionController : ControllerBase
@@ -33,7 +33,6 @@ namespace ExamManagement.Controllers
         [HttpGet("GetAllQuestion")]
         public async Task<ActionResult<IEnumerable<Question>>> GetTeacherQuestions()
         {
-
             return Ok(await _repository.GetAllQuestionsAsync());
         }
 
