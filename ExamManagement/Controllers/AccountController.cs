@@ -137,7 +137,7 @@ namespace ExamManagement.Controllers
 
         [Authorize]
         [HttpPut("UpdateAccount")]
-        public async Task<IActionResult> UpdateAccount(UserDTO updateUserDTO)
+        public async Task<IActionResult> UpdateAccount(UpdateUserDTO updateUserDTO)
         {
             if (updateUserDTO == null)
                 return BadRequest(new ErrorResponse { Message = "Model is empty" });

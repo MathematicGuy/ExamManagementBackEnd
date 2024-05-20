@@ -61,7 +61,6 @@ namespace ExamManagement.Controllers
             var teacherAssignment = new TeacherAssignmentCreate
             {
                 TeacherId = userId,
-                AssignmentId = 1,
             };
 
             var createdAssignment = await _assignmentRepository.CreateAssignmentAsync(assignment, teacherAssignment);

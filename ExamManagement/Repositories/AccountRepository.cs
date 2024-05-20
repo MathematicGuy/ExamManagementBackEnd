@@ -83,7 +83,7 @@ namespace ExamManagement.Repositories
             }
         }
 
-        public async Task<GeneralResponse> UpdateAccountAsync(string userId, UserDTO updateUserDTO)
+        public async Task<GeneralResponse> UpdateAccountAsync(string userId, UpdateUserDTO updateUserDTO)
         {
             if (updateUserDTO == null)
                 return new GeneralResponse(false, "Model is empty");
@@ -91,22 +91,34 @@ namespace ExamManagement.Repositories
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
                 return new GeneralResponse(false, "User not found");
-
+            
             user.Name = updateUserDTO.Name;
             user.Email = updateUserDTO.Email;
-            user.UserName = updateUserDTO.Email;
+            user.PhoneNumber = updateUserDTO.PhoneNumber;
+
+            var checkEmail = await userManager.FindByEmailAsync(user.Email);
+            if (checkEmail is not null) return new GeneralResponse(false, "User registered already");
+
 
             var updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
                 return new GeneralResponse(false, "Failed to update user details");
 
-            if (!string.IsNullOrWhiteSpace(updateUserDTO.Password) && updateUserDTO.Password == updateUserDTO.ConfirmPassword)
+            if (!string.IsNullOrWhiteSpace(updateUserDTO.Password))
             {
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
                 var passwordResult = await userManager.ResetPasswordAsync(user, token, updateUserDTO.Password);
                 if (!passwordResult.Succeeded)
                     return new GeneralResponse(false, "Failed to update password");
             }
+
+            //if (!string.IsNullOrWhiteSpace(updateUserDTO.Email))
+            //{
+            //    var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            //    var emailResult = await userManager.ResetPasswordAsync(user, token, updateUserDTO.Email);
+            //    if (!emailResult.Succeeded)
+            //        return new GeneralResponse(false, "Failed to update Email");
+            //}
 
             return new GeneralResponse(true, "Account updated successfully");
         }
@@ -221,7 +233,6 @@ namespace ExamManagement.Repositories
                 Name = adminDTO.Name,
                 Email = adminDTO.Email,
                 PasswordHash = adminDTO.Password,
-                UserName = adminDTO.Email
             };
 
             var existingUser = await userManager.FindByEmailAsync(newAdmin.Email);
