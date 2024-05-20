@@ -21,7 +21,10 @@ namespace ExamManagement.DTOs.AssignmentDTOs
 
         public List<CreateQuestion>? Questions { get; set; } = new();
 
-        // You can add a method to calculate total points based on QuestionViewModels
+        // This property calculates the total points from the questions
+        public int TotalPoints { get; set; }
+
+        // Method to calculate total points based on questions
         public int? GetTotalPoints() => Questions.Sum(q => q.TotalPoints);
     }
 }

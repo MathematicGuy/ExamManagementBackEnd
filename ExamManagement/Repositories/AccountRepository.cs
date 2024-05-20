@@ -7,10 +7,37 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using static ExamManagement.DTOs.AuthenticationDTOs.ServiceResponses;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+
 namespace ExamManagement.Repositories
 {
-    public class AccountRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config) : IUserAccount
+    public class AccountRepository : IUserAccount
     {
+        private readonly AppDbContext context;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IConfiguration config;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly ITokenService tokenService;
+
+        public AccountRepository(
+            AppDbContext context,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IConfiguration config,
+            SignInManager<ApplicationUser> signInManager,
+            ITokenService tokenService
+         )
+        {
+            this.context = context;
+            this.userManager = userManager;
+            this.roleManager = roleManager;
+            this.config = config;
+            this.signInManager = signInManager;
+            this.tokenService = tokenService;
+        }
 
         public async Task<GeneralResponse> CreateAccount(UserDTO userDTO)
         {
@@ -80,6 +107,8 @@ namespace ExamManagement.Repositories
             return new LoginResponse(true, token, "Login completed", userRoles);
         }
 
+ 
+        // Token for login and logout
         private string GenerateToken(UserSession user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
@@ -106,7 +135,19 @@ namespace ExamManagement.Repositories
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        // Create User, Student, Teacher, Admin, SuperAdmin
+        public async Task<GeneralResponse> LogoutAccount(string token)
+        {
+            var user = await userManager.GetUserAsync(signInManager.Context.User);
+            if (user != null)
+            {
+                await userManager.UpdateSecurityStampAsync(user);
+            }
+            //await tokenService.AddTokenToBlacklist(token);
+
+            return new GeneralResponse(true, "Logout successful");
+        }
+
+
         public async Task<GeneralResponse> CreateSuperAdmin(UserDTO superAdminDTO)
         {
             if (superAdminDTO is null) return new GeneralResponse(false, "Model is empty");

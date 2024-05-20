@@ -11,12 +11,12 @@ using ExamManagement.Contracts;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using ExamManagement;
+using System.IdentityModel.Tokens.Jwt;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
 // Add DbContexts
@@ -36,39 +36,72 @@ builder.Services.AddDbContext<SgsDbContext>(options =>
 builder.Services.AddScoped<ITeacherQuestionRepository, TeacherQuestionRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
-
 // Add Identity & JWT authentication
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddSignInManager()
+    .AddSignInManager<SignInManager<ApplicationUser>>()
     .AddRoles<IdentityRole>()
-    .AddDefaultTokenProviders(); // Include default token providers if needed
+    .AddDefaultTokenProviders();
 
 // Add authentication
-    builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+
+
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    }).AddJwtBearer(options =>
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidateLifetime = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+
+    // Add event handler for token validation
+    //options.Events = new JwtBearerEvents
+    //{
+    //    OnTokenValidated = async context =>
+    //    {
+    //        var tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
+    //        var token = context.SecurityToken as JwtSecurityToken;
+    //        if (token != null && await tokenService.IsTokenBlacklisted(token.RawData))
+    //        {
+    //            context.Fail("This token is no longer valid");
+    //        }
+    //    }
+    //};
+
+    options.Events = new JwtBearerEvents
     {
-        options.TokenValidationParameters = new TokenValidationParameters
+        OnTokenValidated = async context =>
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidateLifetime = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    });
+            var tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
+            var token = context.SecurityToken as JwtSecurityToken;
+            if (token != null && await tokenService.IsTokenBlacklisted(token.RawData))
+            {
+                context.Fail("This token is no longer valid");
+            }
+        }
+    };
+});
+
 
 // Add authorization
 builder.Services.AddAuthorization();
+//builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+//    .AddEntityFrameworkStores<AppDbContext>();
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -96,50 +129,31 @@ builder.Services.AddSwaggerGen(options =>
 
 // Add telemetry
 builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
 
 var app = builder.Build();
+
 app.UseCors();
 
 // Seed roles and super admin
-//using (var scope = app.Services.CreateScope())
-//{
+// using (var scope = app.Services.CreateScope())
+// {
+//     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+//     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-//    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-//    // Seed roles
-//    await DataSeeder.SeedRolesAsync(roleManager);
-//    // Seed super admin
-//    await DataSeeder.SeedSuperAdminAsync(userManager, roleManager);
-//}
-
-
+//     // Seed roles
+//     await DataSeeder.SeedRolesAsync(roleManager);
+//     // Seed super admin
+//     await DataSeeder.SeedSuperAdminAsync(userManager, roleManager);
+// }
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    //app.UseCors(policy =>
-    //{
-    //    policy.WithOrigins("http://localhost:7254", "https://localhost:7254", "https://yunom2834-001-site1.gtempurl.com")
-    //    .AllowAnyMethod()
-    //    .AllowAnyHeader()
-    //    .WithHeaders(HeaderNames.ContentType);
-    //});
 }
 
-
+//app.MapIdentityApi<ApplicationUser>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

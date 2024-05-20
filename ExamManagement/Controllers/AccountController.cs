@@ -3,12 +3,14 @@ using ExamManagement.Data;
 using ExamManagement.DTOs.AuthenticationDTOs;
 using ExamManagement.Models.Errors;
 using ExamManagement.Repositories;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-
 
 namespace ExamManagement.Controllers
 {
@@ -18,19 +20,31 @@ namespace ExamManagement.Controllers
 
     public class AccountController : ControllerBase
     {
-        private readonly IUserAccount userAccount;
+        private readonly IUserAccount _userAccount;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly AppDbContext _context;
+        private readonly ITokenService _tokenService;
 
-        public AccountController(IUserAccount userAccount, UserManager<ApplicationUser> userManager)
+        public AccountController(
+            IUserAccount userAccount,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            AppDbContext context,
+            ITokenService tokenService
+            )
         {
-            this.userAccount = userAccount;
+            _userAccount = userAccount;
             _userManager = userManager;
+            _signInManager = signInManager;
+            _context = context;
+            _tokenService = tokenService;
         }
 
         [HttpPost("CreateSuperAdmin")]
         public async Task<IActionResult> CreateSuperAdmin(UserDTO userDTO)
         {
-            var result = await userAccount.CreateSuperAdmin(userDTO); // Assuming this returns IdentityResult
+            var result = await _userAccount.CreateSuperAdmin(userDTO); // Assuming this returns IdentityResult
 
             if (result.Succeeded)
             {
@@ -50,7 +64,7 @@ namespace ExamManagement.Controllers
         //[Authorize(Policy = "SuperAdminOnly")] // Apply to specific action
         public async Task<IActionResult> CreateAdmin(UserDTO adminDTO)
         {
-            var response = await userAccount.CreateAdminAccount(adminDTO);
+            var response = await _userAccount.CreateAdminAccount(adminDTO);
             return Ok(response);
         }
 
@@ -59,7 +73,7 @@ namespace ExamManagement.Controllers
         public async Task<IActionResult> CreateTeacher(UserDTO teacherDTO)
         {
 
-            var result = await userAccount.CreateTeacherAccount(teacherDTO);
+            var result = await _userAccount.CreateTeacherAccount(teacherDTO);
 
             if (result.Flag) // Check if the operation was successful
             {
@@ -88,7 +102,7 @@ namespace ExamManagement.Controllers
         public async Task<IActionResult> CreateStudent(UserDTO studentDTO)
         {
 
-            var result = await userAccount.CreateStudentAccount(studentDTO);
+            var result = await _userAccount.CreateStudentAccount(studentDTO);
 
             if (result.Flag) // Check if the operation was successful
             {
@@ -108,7 +122,7 @@ namespace ExamManagement.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserDTO userDTO)
         {
-            var response = await userAccount.CreateAccount(userDTO);
+            var response = await _userAccount.CreateAccount(userDTO);
             return Ok(response);
         }
 
@@ -117,8 +131,36 @@ namespace ExamManagement.Controllers
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
    
-            var response = await userAccount.LoginAccount(loginDTO);
+            var response = await _userAccount.LoginAccount(loginDTO);
             return Ok(response);
+        }
+
+        //[HttpPost("logout")]
+        //[Authorize]
+        //public async Task<IActionResult> Logout()
+        //{
+        //    // Retrieve the token from the Authorization header
+        //    var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+        //    var result = await _userAccount.LogoutAccount(token);
+        //    if (result.Flag)
+        //    {
+        //        return Ok(result.Message);
+        //    }
+
+        //    return BadRequest(result.Message);
+        //}
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+        {
+            if (string.IsNullOrEmpty(request.RefreshToken))
+            {
+                return BadRequest("Invalid request");
+            }
+
+            await _tokenService.InvalidateRefreshTokenAsync(request.RefreshToken);
+            return Ok(new { message = "Logout successful" });
         }
 
 
@@ -193,6 +235,9 @@ namespace ExamManagement.Controllers
 }
 
 
+public class LogoutRequest{
+    public string RefreshToken { get; set; }
+}
 
 //{
 //"email": "king@gmail.com",
@@ -209,6 +254,6 @@ namespace ExamManagement.Controllers
 //}
 
 //{
-  //"email": "superadmin2@gmail.com",
-  //"password": "Super2@123"
+//"email": "superadmin2@gmail.com",
+//"password": "Super2@123"
 //}

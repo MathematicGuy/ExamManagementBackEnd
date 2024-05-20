@@ -39,7 +39,7 @@ public class AssignmentRepository : IAssignmentRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Assignment> CreateAssignmentAsync(Assignment assignment, TeacherAssignment teacherAssignment)
+    public async Task<Assignment> CreateAssignmentAsync(Assignment assignment, ExamManagement.Models.TeacherAssignment teacherAssignment)
     {
         _context.Assignments.Add(assignment);
         _context.TeacherAssignments.Add(teacherAssignment);
@@ -47,7 +47,7 @@ public class AssignmentRepository : IAssignmentRepository
         return assignment;
     }
 
-    public async Task<CreateAssignment?> GetAssignmentByIdAsync(int id) // Return CreateAssignment
+    public async Task<CreateAssignment?> GetAssignmentByIdAsync(int id)
     {
         var assignment = await _context.Assignments
             .Include(a => a.AssignmentQuestions)
@@ -57,9 +57,8 @@ public class AssignmentRepository : IAssignmentRepository
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (assignment == null)
-            return null; // Or throw an exception if you prefer
+            return null;
 
-        // Check if the logged-in teacher is the creator of this assignment
         var currentUser = _httpContextAccessor.HttpContext?.User;
         if (currentUser == null || !currentUser.IsInRole("Teacher"))
         {
@@ -69,7 +68,9 @@ public class AssignmentRepository : IAssignmentRepository
         var teacherIdClaim = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
         if (int.TryParse(teacherIdClaim, out int teacherId) && assignment.TeacherAssignments.Any(ta => ta.TeacherId == teacherId))
         {
-            return _mapper.Map<CreateAssignment>(assignment);
+            var createAssignment = _mapper.Map<CreateAssignment>(assignment);
+            createAssignment.TotalPoints = createAssignment.Questions?.Sum(q => q.TotalPoints) ?? 0;
+            return createAssignment;
         }
 
         return null;
@@ -78,12 +79,6 @@ public class AssignmentRepository : IAssignmentRepository
     public async Task<bool> IsTeacherAuthorized(int assignmentId, int teacherId)
     {
         return await _context.TeacherAssignments.AnyAsync(ta => ta.AssignmentId == assignmentId && ta.TeacherId == teacherId);
-    }
-
-
-    Task<Assignment> IAssignmentRepository.GetAssignmentByIdAsync(int id)
-    {
-        throw new NotImplementedException();
     }
 }
 

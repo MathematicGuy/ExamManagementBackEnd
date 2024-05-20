@@ -8,6 +8,7 @@ namespace ExamManagement.Contracts
         Task<GeneralResponse> CreateAdminAccount(UserDTO userDTO);
         Task<GeneralResponse> CreateSuperAdmin(UserDTO userDTO);
         Task<LoginResponse> LoginAccount(LoginDTO loginDTO);
+        Task<GeneralResponse> LogoutAccount(string token);
         Task<GeneralResponse> CreateTeacherAccount(UserDTO teacherDTO);
         Task<GeneralResponse> CreateStudentAccount(UserDTO studentDTO);
 
