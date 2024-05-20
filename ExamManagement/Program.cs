@@ -33,13 +33,16 @@ builder.Services.AddDbContext<SgsDbContext>(options =>
 });
 
 // Inject Repositories
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<ITeacherQuestionRepository, TeacherQuestionRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
+builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Add AutoMapper
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddHttpContextAccessor();
+
 
 // Add Identity & JWT authentication
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

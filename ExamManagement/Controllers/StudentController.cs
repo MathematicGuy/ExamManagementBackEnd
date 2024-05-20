@@ -37,7 +37,7 @@ namespace ExamManagement.Controllers
 
         // GET: api/Students/5
         [HttpGet("GetStudentById{id}")]
-        public async Task<ActionResult<Student>> GetStudentById(int id)
+        public async Task<ActionResult<Student>> GetStudentById(string id)
         {
             var student = await _studentRepository.GetStudentByIdAsync(id);
             if (student == null)
@@ -60,8 +60,6 @@ namespace ExamManagement.Controllers
                     Details = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
                 });
             }
-
-
             try
             {
                 // Check if the StudentId already exists
@@ -104,7 +102,7 @@ namespace ExamManagement.Controllers
         // Create a Table for Deactivate Student. Transfer Student data to DeletedStudent Table 
 
         [HttpPut("UpdateStudent{id}")]
-        public async Task<IActionResult> UpdateStudent(int id, [FromBody] UpdateStudent updateStudent)
+        public async Task<IActionResult> UpdateStudent(string id, [FromBody] UpdateStudent updateStudent)
         {
             if (!ModelState.IsValid)
             {

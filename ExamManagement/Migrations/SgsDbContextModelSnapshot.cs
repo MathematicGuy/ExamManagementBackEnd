@@ -24,11 +24,11 @@ namespace ExamManagement.Migrations
 
             modelBuilder.Entity("ExamManagement.Models.Assignment", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("AssignmentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentId"));
 
                     b.Property<int?>("AssignmentTotalPoints")
                         .HasColumnType("int");
@@ -51,7 +51,7 @@ namespace ExamManagement.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("Id");
+                    b.HasKey("AssignmentId");
 
                     b.ToTable("Assignments");
                 });
@@ -138,11 +138,8 @@ namespace ExamManagement.Migrations
 
             modelBuilder.Entity("ExamManagement.Models.Student", b =>
                 {
-                    b.Property<int>("StudentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentId"));
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -161,8 +158,8 @@ namespace ExamManagement.Migrations
 
             modelBuilder.Entity("ExamManagement.Models.StudentAssignment", b =>
                 {
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int");
@@ -176,11 +173,8 @@ namespace ExamManagement.Migrations
 
             modelBuilder.Entity("ExamManagement.Models.Teacher", b =>
                 {
-                    b.Property<int>("TeacherId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeacherId"));
+                    b.Property<string>("TeacherId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -199,8 +193,8 @@ namespace ExamManagement.Migrations
 
             modelBuilder.Entity("ExamManagement.Models.TeacherAssignment", b =>
                 {
-                    b.Property<int>("TeacherId")
-                        .HasColumnType("int");
+                    b.Property<string>("TeacherId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int");

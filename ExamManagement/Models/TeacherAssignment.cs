@@ -8,7 +8,7 @@ namespace ExamManagement.Models
     {
 
         [Required]
-        public int TeacherId { get; set; }
+        public string TeacherId { get; set; }
 
         [Required]
         public int AssignmentId { get; set; }

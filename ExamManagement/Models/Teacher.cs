@@ -6,7 +6,7 @@ namespace ExamManagement.Models
 {
     public class Teacher
     {
-        public int TeacherId { get; set; }
+        public string TeacherId { get; set; }
         public string Name { get; set; }
         public string? Role { get; set; }
         public string? status { get; set; }

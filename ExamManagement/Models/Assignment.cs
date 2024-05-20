@@ -5,7 +5,7 @@ namespace ExamManagement.Models
 {
     public class Assignment
     {
-        public int Id { get; set; }
+        public int AssignmentId { get; set; }
 
         [Required]
         [MaxLength(100)] // Example max length constraint
@@ -14,14 +14,14 @@ namespace ExamManagement.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime PublishTime { get; set; }
+        public DateTime PublishTime { get; set; } 
 
         public DateTime? CloseTime { get; set; } // CloseTime is optional 
 
         public int? AssignmentTotalPoints { get; set; }
 
         [Required]
-        public string? Status { get; set; }
+        public string? Status { get; set; } = "Draft"; // Draft/Published/Close
 
         // Many to 1 Teacher & Student User
         public ICollection<TeacherAssignment>? TeacherAssignments { get; set; } // Change to

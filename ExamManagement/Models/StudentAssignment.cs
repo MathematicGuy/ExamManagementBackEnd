@@ -7,7 +7,7 @@ namespace ExamManagement.Models
     public class StudentAssignment
     {
         [Required]
-        public int StudentId { get; set; }
+        public string StudentId { get; set; }
 
         [Required]
         public int AssignmentId { get; set; }

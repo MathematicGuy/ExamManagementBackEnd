@@ -5,8 +5,8 @@ using ExamManagement.Repositories;
 using ExamManagement.Models;
 using ExamManagement.DTOs.AssignmentDTOs;
 using Microsoft.AspNetCore.Identity;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using System.Security.Claims;
+using ExamManagement.DTOs.QuestionDTOs;
 
 public class AssignmentRepository : IAssignmentRepository
 {
@@ -39,47 +39,95 @@ public class AssignmentRepository : IAssignmentRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Assignment> CreateAssignmentAsync(Assignment assignment, ExamManagement.Models.TeacherAssignment teacherAssignment)
+    public async Task<Assignment> CreateAssignmentAsync(CreateAssignment newAssignment, TeacherAssignmentCreate newTeacherAssignment)
     {
-        _context.Assignments.Add(assignment);
-        _context.TeacherAssignments.Add(teacherAssignment);
+        // Create a new Assignment object from the CreateAssignment
+        var assignment = new Assignment
+        {
+            Title = newAssignment.Title,
+            Description = newAssignment.Description,
+            PublishTime = newAssignment.PublishTime,
+            CloseTime = newAssignment.CloseTime,
+            //Status = newAssignment.Status,
+            // You may need to map other properties as well
+        };
+
+        // Create a new teacherAssignment object from the TeacherAssignmentCreate
+        var teacherAssignment = new TeacherAssignment
+        {
+            TeacherId = newTeacherAssignment.TeacherId,
+            AssignmentId = newTeacherAssignment.AssignmentId // Assign the newly created AssignmentId
+        };
+
+        // Add the new Assignment to the context
+        await _context.Assignments.AddAsync(assignment);
+
+        // Add the TeacherAssignment to the context
+        await _context.TeacherAssignments.AddAsync(teacherAssignment);
+
+        // Save changes to the database
         await _context.SaveChangesAsync();
+
+        // Return the newly created Assignment
         return assignment;
+    }
+
+
+    public async Task AddQuestionToAssignmentAsync(string teacherId, int assignmentId, int questionId)
+    {
+        var assignmentQuestion = new AssignmentQuestion 
+        { 
+            AssignmentId = assignmentId,
+            QuestionId = questionId
+        }; 
+
+        await _context.AssignmentQuestions.AddAsync(assignmentQuestion);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<CreateAssignment?> GetAssignmentByIdAsync(int id)
     {
         var assignment = await _context.Assignments
-            .Include(a => a.AssignmentQuestions)
-                .ThenInclude(aq => aq.Question)
             .Include(a => a.TeacherAssignments)
                 .ThenInclude(ta => ta.Teacher)
-            .FirstOrDefaultAsync(a => a.Id == id);
+            .Include(a => a.AssignmentQuestions)
+                .ThenInclude(aq => aq.Question)
+            .FirstOrDefaultAsync(a => a.AssignmentId == id);
 
         if (assignment == null)
-            return null;
-
-        var currentUser = _httpContextAccessor.HttpContext?.User;
-        if (currentUser == null || !currentUser.IsInRole("Teacher"))
         {
             return null;
         }
 
-        var teacherIdClaim = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (int.TryParse(teacherIdClaim, out int teacherId) && assignment.TeacherAssignments.Any(ta => ta.TeacherId == teacherId))
+        var teacherAssignment = assignment.TeacherAssignments.FirstOrDefault();
+        var teacherDTO = new Teacher
         {
-            var createAssignment = _mapper.Map<CreateAssignment>(assignment);
-            createAssignment.TotalPoints = createAssignment.Questions?.Sum(q => q.TotalPoints) ?? 0;
-            return createAssignment;
-        }
+            TeacherId = teacherAssignment?.TeacherId ?? string.Empty, // Changed to string
+            Name = teacherAssignment?.Teacher.Name ?? string.Empty
+        };
 
-        return null;
-    }
+        var questions = assignment.AssignmentQuestions.Select(aq => new ViewQuestion
+        {
+            QuestionId = aq.QuestionId,
+            Name = aq.Question.Name,
+            Description = aq.Question.Description,
+            TotalPoints = aq.Question.TotalPoints ?? 0
+        }).ToList();
 
-    public async Task<bool> IsTeacherAuthorized(int assignmentId, int teacherId)
-    {
-        return await _context.TeacherAssignments.AnyAsync(ta => ta.AssignmentId == assignmentId && ta.TeacherId == teacherId);
+        var newAssignment = new CreateAssignment
+        {
+            //AssignmentId = assignment.Id,
+            Title = assignment.Title,
+            Description = assignment.Description,
+            PublishTime = assignment.PublishTime,
+            CloseTime = assignment.CloseTime,
+            //Status = assignment.Status,
+            //TeacherId = teacherDTO.TeacherId // Assign TeacherId from teacherDTO
+        };
+
+        return newAssignment;
     }
 }
 
 
+    

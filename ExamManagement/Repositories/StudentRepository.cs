@@ -18,7 +18,7 @@ namespace ExamManagement.Repositories
             return await _context.Student.ToListAsync();
         }
 
-        public async Task<Student?> GetStudentByIdAsync(int id)
+        public async Task<Student?> GetStudentByIdAsync(string id)
         {
             return await _context.Student.FindAsync(id);
         }
@@ -36,16 +36,6 @@ namespace ExamManagement.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteStudentAsync(int id)
-        {
-            var student = await _context.Student.FindAsync(id);
-            if (student == null)
-            {
-                // Handle case where student is not found (e.g., throw an exception or log it)
-                return;
-            }
-            _context.Student.Remove(student);
-            await _context.SaveChangesAsync();
-        }
+      
     }
 }

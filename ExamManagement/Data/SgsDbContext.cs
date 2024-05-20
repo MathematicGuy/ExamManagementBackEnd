@@ -26,7 +26,7 @@ namespace ExamManagement.Data
             // Configure primary keys
             modelBuilder.Entity<Student>().HasKey(std => std.StudentId);
             modelBuilder.Entity<Teacher>().HasKey(tch => tch.TeacherId);
-            modelBuilder.Entity<Assignment>().HasKey(a => a.Id);
+            modelBuilder.Entity<Assignment>().HasKey(a => a.AssignmentId);
             modelBuilder.Entity<Question>().HasKey(q => q.Id);
             modelBuilder.Entity<AssignmentQuestion>().HasKey(aq => new { aq.AssignmentId, aq.QuestionId });
             modelBuilder.Entity<FeedBack>().HasKey(fb => fb.Id);

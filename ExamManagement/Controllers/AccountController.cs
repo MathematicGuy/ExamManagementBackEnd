@@ -136,7 +136,7 @@ namespace ExamManagement.Controllers
         }
 
         //[HttpPost("logout")]
-        //[Authorize]
+        //[Authorize]   
         //public async Task<IActionResult> Logout()
         //{
         //    // Retrieve the token from the Authorization header
@@ -169,14 +169,15 @@ namespace ExamManagement.Controllers
         public async Task<IActionResult> GetCurrentUserInfo()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get User ID
-
             //if (string.IsNullOrEmpty(userId))
             //{
             //    return Unauthorized(new { message = "User must Logged in to see your personal information" });
             //}
 
             var user = await _userManager.FindByIdAsync(userId);
+            //var userEmail = await userManager.FindByEmailAsync(loginDTO.Email);
 
+            Console.Write(user.Id);
             if (user == null)
             {
                 return NotFound(new { message = "User not found" });
@@ -204,9 +205,12 @@ namespace ExamManagement.Controllers
                 user.TwoFactorEnabled,
                 user.LockoutEnabled,
                 user.AccessFailedCount,
+                
                 Token = token.RawData,
-                TokenExpiration = tokenExpiry  // Include token expiration time
+                TokenExpiration = tokenExpiry, // Include token expiration time
+                UserRoles = await _userManager.GetRolesAsync(user),
             };
+
 
             return Ok(userInfo);
         }

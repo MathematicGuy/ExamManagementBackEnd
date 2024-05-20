@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ExamManagement.Migrations
 {
     /// <inheritdoc />
-    public partial class Why : Migration
+    public partial class ThisisNew : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,17 +15,18 @@ namespace ExamManagement.Migrations
                 name: "Assignments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    AssignmentId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PublishTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CloseTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AssignmentTotalPoints = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Assignments", x => x.Id);
+                    table.PrimaryKey("PK_Assignments", x => x.AssignmentId);
                 });
 
             migrationBuilder.CreateTable(
@@ -49,10 +50,10 @@ namespace ExamManagement.Migrations
                 name: "Student",
                 columns: table => new
                 {
-                    StudentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -63,10 +64,10 @@ namespace ExamManagement.Migrations
                 name: "Teacher",
                 columns: table => new
                 {
-                    TeacherId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TeacherId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,7 +88,7 @@ namespace ExamManagement.Migrations
                         name: "FK_AssignmentQuestions_Assignments_AssignmentId",
                         column: x => x.AssignmentId,
                         principalTable: "Assignments",
-                        principalColumn: "Id",
+                        principalColumn: "AssignmentId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AssignmentQuestions_Questions_QuestionId",
@@ -104,7 +105,10 @@ namespace ExamManagement.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Context = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Score = table.Column<float>(type: "real", nullable: false),
+                    Evaluation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ScoreAI = table.Column<float>(type: "real", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuestionResponseId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -121,9 +125,8 @@ namespace ExamManagement.Migrations
                 name: "StudentAssignments",
                 columns: table => new
                 {
-                    StudentId = table.Column<int>(type: "int", nullable: false),
-                    AssignmentId = table.Column<int>(type: "int", nullable: false),
-                    AssignmentTotalPoints = table.Column<int>(type: "int", nullable: true)
+                    StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AssignmentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -132,7 +135,7 @@ namespace ExamManagement.Migrations
                         name: "FK_StudentAssignments_Assignments_AssignmentId",
                         column: x => x.AssignmentId,
                         principalTable: "Assignments",
-                        principalColumn: "Id",
+                        principalColumn: "AssignmentId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StudentAssignments_Student_StudentId",
@@ -146,7 +149,7 @@ namespace ExamManagement.Migrations
                 name: "TeacherAssignments",
                 columns: table => new
                 {
-                    TeacherId = table.Column<int>(type: "int", nullable: false),
+                    TeacherId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AssignmentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -156,7 +159,7 @@ namespace ExamManagement.Migrations
                         name: "FK_TeacherAssignments_Assignments_AssignmentId",
                         column: x => x.AssignmentId,
                         principalTable: "Assignments",
-                        principalColumn: "Id",
+                        principalColumn: "AssignmentId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TeacherAssignments_Teacher_TeacherId",

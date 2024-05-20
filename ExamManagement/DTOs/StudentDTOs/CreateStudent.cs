@@ -4,7 +4,7 @@ namespace ExamManagement.DTOs.StudentDTOs
 {
     public class CreateStudent
     {
-        public int StudentId { get; set; }
+        public string StudentId { get; set; }
 
         [Required(ErrorMessage = "Name is required.")]
         public string? Name { get; set; }
