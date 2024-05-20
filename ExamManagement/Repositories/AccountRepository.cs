@@ -97,7 +97,14 @@ namespace ExamManagement.Repositories
             user.PhoneNumber = updateUserDTO.PhoneNumber;
 
             var checkEmail = await userManager.FindByEmailAsync(user.Email);
-            if (checkEmail is not null) return new GeneralResponse(false, "User registered already");
+            var existed = 0;
+            if (checkEmail is not null)
+                existed++;
+
+            if (existed > 1)
+            {
+                return new GeneralResponse(false, "User already registered");
+            }
 
 
             var updateResult = await userManager.UpdateAsync(user);
@@ -236,7 +243,7 @@ namespace ExamManagement.Repositories
             };
 
             var existingUser = await userManager.FindByEmailAsync(newAdmin.Email);
-            if (existingUser is not null)
+            if (existingUser is not null) 
                 return new GeneralResponse(false, "User already registered");
 
             var result = await userManager.CreateAsync(newAdmin, adminDTO.Password);
@@ -332,9 +339,9 @@ namespace ExamManagement.Repositories
         }
 
 
-
-
         // Update Profile Features
+        
+
     }
 
 }

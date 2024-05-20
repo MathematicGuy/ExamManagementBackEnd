@@ -7,7 +7,7 @@ namespace ExamManagement.Repositories
     {
         //Task<Assignment> CreateAssignmentAsync(Assignment assignment, List<Question> questions, string teacherId);
         Task<CreateAssignment> GetAssignmentByIdAsync(int id); // Include Questions in ViewModel
-        Task<Assignment> CreateAssignmentAsync(CreateAssignment assignment, TeacherAssignmentCreate teacherAssignment);
+        Task<Assignment> CreateAssignmentAsync(CreateAssignment newAssignment, TeacherAssignment teacherAssignment);
         Task AddQuestionToAssignmentAsync(string teacherId, int assignmentId, int question);
     }
 }

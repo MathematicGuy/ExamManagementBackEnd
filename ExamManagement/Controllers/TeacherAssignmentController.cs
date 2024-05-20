@@ -35,37 +35,32 @@ namespace ExamManagement.Controllers
         }
 
         // Endpoint to create a new assignment
-        [Authorize(Roles = "Teacher")]
+        //[Authorize(Roles = "Teacher")]
         [HttpPost("CreateAssignment")]
 
-        public async Task<IActionResult> CreateAssignment(CreateAssignment newAssignment)
+        public async Task<IActionResult> CreateAssignment([FromBody] CreateAssignment newAssignment) // Use [FromBody] for model binding
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var assignment = new CreateAssignment
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get authenticated teacher's ID
+
+            var teacherAssignment = new TeacherAssignment
             {
-                //AssignmentId = newAssignment.AssignmentId,
-                //TeacherId = newAssignment.TeacherId, // take the Login Teacher Id. Front-end job to get teacherId
-                Title = newAssignment.Title,
-                Description = newAssignment.Description,
-                PublishTime = newAssignment.PublishTime, // 05/20/2024 09:16:33
-                CloseTime = newAssignment.CloseTime,
-                //Status = "Published"
+                TeacherId = teacherId,
+                // AssignmentId will be assigned by the repository
             };
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get User ID
-
-            var teacherAssignment = new TeacherAssignmentCreate
-            {
-                TeacherId = userId,
-            };
-
-            var createdAssignment = await _assignmentRepository.CreateAssignmentAsync(assignment, teacherAssignment);
-
+            var createdAssignment = await _assignmentRepository.CreateAssignmentAsync(newAssignment, teacherAssignment);
             return CreatedAtAction(nameof(GetAssignmentById), new { id = createdAssignment.AssignmentId }, createdAssignment);
+            
+            //catch (Exception ex)
+            //{
+            //    // Log the exception (using a logger of your choice)
+            //    return StatusCode(500, "An error occurred while creating the assignment.");
+            //}
         }
 
 

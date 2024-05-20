@@ -39,7 +39,7 @@ public class AssignmentRepository : IAssignmentRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Assignment> CreateAssignmentAsync(CreateAssignment newAssignment, TeacherAssignmentCreate newTeacherAssignment)
+    public async Task<Assignment> CreateAssignmentAsync(CreateAssignment newAssignment, TeacherAssignment newTeacherAssignment)
     {
         // Create a new Assignment object from the CreateAssignment
         var assignment = new Assignment
@@ -51,16 +51,16 @@ public class AssignmentRepository : IAssignmentRepository
             //Status = newAssignment.Status,
             // You may need to map other properties as well
         };
+        // Add the new Assignment to the context and get its Id
+        var addedAssignment = await _context.Assignments.AddAsync(assignment);
+        await _context.SaveChangesAsync(); // Save to get generated Id
 
-        // Create a new teacherAssignment object from the TeacherAssignmentCreate
+        // Set the TeacherAssignment's AssignmentId to the saved assignment's Id
         var teacherAssignment = new TeacherAssignment
         {
             TeacherId = newTeacherAssignment.TeacherId,
-            AssignmentId = newTeacherAssignment.AssignmentId // Assign the newly created AssignmentId
+            AssignmentId = addedAssignment.Entity.AssignmentId, // Updated assignmentId   
         };
-
-        // Add the new Assignment to the context
-        await _context.Assignments.AddAsync(assignment);
 
         // Add the TeacherAssignment to the context
         await _context.TeacherAssignments.AddAsync(teacherAssignment);
@@ -69,7 +69,7 @@ public class AssignmentRepository : IAssignmentRepository
         await _context.SaveChangesAsync();
 
         // Return the newly created Assignment
-        return assignment;
+        return addedAssignment.Entity; // Return the added assignment
     }
 
 

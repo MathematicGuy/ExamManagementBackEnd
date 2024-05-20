@@ -2,10 +2,10 @@
 
 namespace ExamManagement.DTOs.AssignmentDTOs
 {
-    public class TeacherAssignmentCreate
+    public class teacherAssignment
     {
         [Required]
-        public string TeacherId { get; set; }
+        public string? TeacherId { get; set; }
 
         [Required]
         public int AssignmentId { get; set; }
