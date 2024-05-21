@@ -5,17 +5,16 @@ using ExamManagement.Models;
 
 namespace ExamManagement.Services
 {
-    public class MappingProfile : Profile
+    public class AssignmentProfile : Profile
     {
-        //public MappingProfile()
-        //{
-        //    CreateMap<Assignment, CreateAssignment>()
-        //        .ForMember(dest => dest.Questions, opt => opt.MapFrom(src => src.AssignmentQuestions.Select(aq => aq.Question)))
-        //        .ForMember(dest => dest.TotalPoints, opt => opt.Ignore()); // TotalPoints is calculated separately
-
-        //    CreateMap<Question, ViewQuestion>()
-        //        .ForMember(dest => dest.QuestionId, opt => opt.MapFrom(src => src.Id));
-        //}
+        public AssignmentProfile()
+        {
+            CreateMap<CreateAssignment, Assignment>()
+                .ForMember(dest => dest.AssignmentId, opt => opt.Ignore()) // Ignore the ID since it's auto-generated
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "Open")) // Set a default status of "Open"
+                .ForMember(dest => dest.TeacherAssignments, opt => opt.Ignore()) // Ignore the TeacherAssignments collection
+                .ForMember(dest => dest.StudentAssignments, opt => opt.Ignore()) // Ignore the StudentAssignments collection
+                .ForMember(dest => dest.AssignmentQuestions, opt => opt.Ignore()); // Ignore the AssignmentQuestions collection
+        }
     }
-
 }

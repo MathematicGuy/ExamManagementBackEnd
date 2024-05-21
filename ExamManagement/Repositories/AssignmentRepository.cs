@@ -7,6 +7,7 @@ using ExamManagement.DTOs.AssignmentDTOs;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using ExamManagement.DTOs.QuestionDTOs;
+using Microsoft.AspNetCore.Authorization;
 
 public class AssignmentRepository : IAssignmentRepository
 {
@@ -39,37 +40,43 @@ public class AssignmentRepository : IAssignmentRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<Assignment> CreateAssignmentAsync(CreateAssignment newAssignment, TeacherAssignment newTeacherAssignment)
+    [Authorize] // Requires user to be logged in. reutrn 401 if not logged in
+    public async Task<Assignment> CreateAssignmentAsync(CreateAssignment newAssignment, string teacherId)
     {
         // Create a new Assignment object from the CreateAssignment
-        var assignment = new Assignment
-        {
-            Title = newAssignment.Title,
-            Description = newAssignment.Description,
-            PublishTime = newAssignment.PublishTime,
-            CloseTime = newAssignment.CloseTime,
-            //Status = newAssignment.Status,
-            // You may need to map other properties as well
-        };
+        //var assignment = new Assignment
+        //{
+        //    Title = newAssignment.Title,
+        //    Description = newAssignment.Description,
+        //    PublishTime = newAssignment.PublishTime,
+        //    CloseTime = newAssignment.CloseTime,
+        //    //Status = newAssignment.Status,
+        //    // You may need to map other properties as well
+        //};
+
+        var assignment = _mapper.Map<Assignment>(newAssignment);  // Map DTO to Assignment entity 
+
         // Add the new Assignment to the context and get its Id
         var addedAssignment = await _context.Assignments.AddAsync(assignment);
+
+        _context.Assignments.Add(assignment); // No need for async here
         await _context.SaveChangesAsync(); // Save to get generated Id
 
         // Set the TeacherAssignment's AssignmentId to the saved assignment's Id
         var teacherAssignment = new TeacherAssignment
         {
-            TeacherId = newTeacherAssignment.TeacherId,
-            AssignmentId = addedAssignment.Entity.AssignmentId, // Updated assignmentId   
+            TeacherId = teacherId,
+            AssignmentId = assignment.AssignmentId
         };
 
         // Add the TeacherAssignment to the context
-        await _context.TeacherAssignments.AddAsync(teacherAssignment);
+        _context.TeacherAssignments.Add(teacherAssignment);
 
         // Save changes to the database
         await _context.SaveChangesAsync();
 
         // Return the newly created Assignment
-        return addedAssignment.Entity; // Return the added assignment
+        return assignment;
     }
 
 

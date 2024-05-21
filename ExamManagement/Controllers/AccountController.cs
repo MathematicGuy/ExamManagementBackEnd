@@ -59,9 +59,8 @@ namespace ExamManagement.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")] // Restrict to existing SuperAdmin only
+        //[Authorize(Roles = "Admin")] // Restrict to existing SuperAdmin only
         [HttpPost("CreateAdmin")]
-        //[Authorize(Policy = "SuperAdminOnly")] // Apply to specific action
         public async Task<IActionResult> CreateAdmin(UserDTO adminDTO)
         {
             var response = await _userAccount.CreateAdminAccount(adminDTO);

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Web.Http.ModelBinding;
@@ -35,37 +36,40 @@ namespace ExamManagement.Controllers
         }
 
         // Endpoint to create a new assignment
-        //[Authorize(Roles = "Teacher")]
         [HttpPost("CreateAssignment")]
-
-        public async Task<IActionResult> CreateAssignment([FromBody] CreateAssignment newAssignment) // Use [FromBody] for model binding
+        //[Authorize(Roles = "Teacher")] // Ensure only authorized teachers can create assignments
+        public async Task<IActionResult> CreateAssignment([FromBody] CreateAssignment newAssignment, string userId)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get authenticated teacher's ID
-
-            var teacherAssignment = new TeacherAssignment
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get teacher's ID
+            //var teacherId = userId;
+            var teacherExists = await _context.Teacher.AnyAsync(t => t.TeacherId == teacherId);
+            if (!teacherExists)
             {
-                TeacherId = teacherId,
-                // AssignmentId will be assigned by the repository
-            };
+                return BadRequest("Teacher not found.");
+            }
 
-            var createdAssignment = await _assignmentRepository.CreateAssignmentAsync(newAssignment, teacherAssignment);
-            return CreatedAtAction(nameof(GetAssignmentById), new { id = createdAssignment.AssignmentId }, createdAssignment);
-            
-            //catch (Exception ex)
+            //if (teacherId == null)
             //{
-            //    // Log the exception (using a logger of your choice)
-            //    return StatusCode(500, "An error occurred while creating the assignment.");
+            //    return Unauthorized("Teacher not authenticated.");
             //}
+            // 16d32e0b-2735-45e6-b199-0eebb66b864d
+            var createdAssignment = await _assignmentRepository.CreateAssignmentAsync(newAssignment, teacherId);
+                return CreatedAtAction(nameof(GetAssignmentById), new { id = createdAssignment.AssignmentId }, createdAssignment);
         }
 
 
-        // Endpoint to get an assignment by its ID
-        [HttpGet("GetAssignmentById{id}")]
+        //{
+        //  "email": "teacher@gmail.com",
+        //  "password": "TeachMen@123"
+        //}
+    // Endpoint to get an assignment by its ID
+    [HttpGet("GetAssignmentById{id}")]
         //[Authorize(Roles = "Teacher,Student")]
         public async Task<IActionResult> GetAssignmentById(int id)
         {

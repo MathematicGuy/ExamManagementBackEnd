@@ -12,6 +12,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using ExamManagement;
 using System.IdentityModel.Tokens.Jwt;
+using ExamManagement.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,7 @@ builder.Services.AddDbContext<SgsDbContext>(options =>
 
 // Inject Repositories
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
 builder.Services.AddScoped<ITeacherQuestionRepository, TeacherQuestionRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IUserAccount, AccountRepository>();
@@ -135,7 +137,13 @@ builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
-app.UseCors();
+app.UseRouting();
+app.UseCors(x => x
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .SetIsOriginAllowed(SeekOrigin => true)
+    .AllowCredentials());
+
 
 // Seed roles and super admin
 // using (var scope = app.Services.CreateScope())

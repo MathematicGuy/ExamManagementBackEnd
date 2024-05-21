@@ -240,6 +240,8 @@ namespace ExamManagement.Repositories
                 Name = adminDTO.Name,
                 Email = adminDTO.Email,
                 PasswordHash = adminDTO.Password,
+                UserName = adminDTO.Email
+
             };
 
             var existingUser = await userManager.FindByEmailAsync(newAdmin.Email);
@@ -248,7 +250,7 @@ namespace ExamManagement.Repositories
 
             var result = await userManager.CreateAsync(newAdmin, adminDTO.Password);
             if (!result.Succeeded)
-                return new GeneralResponse(false, "Error occurred while creating the account.");
+                return new GeneralResponse(false, "Error occurred while creating the account. Missing some input data?");
 
             // Ensure the Admin role exists
             var adminRole = await roleManager.FindByNameAsync("Admin");
